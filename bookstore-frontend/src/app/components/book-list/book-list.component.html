@@ -1,0 +1,75 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Inventario de Libros</h2>
+    <div class="d-flex align-items-center">
+      @if (isFetching) {
+        <div class="spinner-border text-primary me-3" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
+      }
+      <button class="btn btn-primary" routerLink="/books/new">Añadir Libro</button>
+    </div>
+  </div>
+  
+  <div class="mb-3 d-flex align-items-center">
+    <input type="text" #catInput class="form-control me-2" placeholder="Buscar categoría..." style="max-width: 200px;">
+    <button class="btn btn-outline-primary me-2" (click)="loadBooks(catInput.value)" [disabled]="isFetching">Buscar</button>
+    <button class="btn btn-outline-secondary me-2" (click)="catInput.value=''; loadBooks()" [disabled]="isFetching">Todos</button>
+    <button class="btn btn-outline-warning me-3" (click)="loadLowStock()" [disabled]="isFetching">Ver Stock Bajo</button>
+    
+    <label class="me-2 fw-bold">Moneda:</label>
+    <select #currencySelect class="form-select d-inline-block" style="width: auto;" (change)="selectedCurrency = currencySelect.value">
+      <option value="EUR" selected>EUR (€)</option>
+      <option value="GBP">GBP (£)</option>
+      <option value="MXN">MXN ($)</option>
+      <option value="COP">COP ($)</option>
+      <option value="ARS">ARS ($)</option>
+      <option value="VES">VES (Bs.)</option>
+    </select>
+  </div>
+
+  @if (calcResult) {
+    <div class="alert alert-success alert-dismissible fade show">
+      <strong>Cálculo exitoso:</strong> Costo base {{ calcResult.cost_usd }} USD <br>
+      Tasa: {{ calcResult.exchange_rate }} <br>
+      <strong>Precio Final (Margen {{ calcResult.margin_percentage }}%): {{ calcResult.selling_price_local }} {{ calcResult.currency }}</strong>
+      <button type="button" class="btn-close" (click)="calcResult = null"></button>
+    </div>
+  }
+
+  <table class="table table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>Título</th>
+        <th>ISBN</th>
+        <th>Stock</th>
+        <th>Precio Local</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (book of books; track book.id) {
+        <tr>
+          <td>{{ book.title }}</td>
+          <td>{{ book.isbn }}</td>
+          <td>
+            <span [class.text-danger]="book.stock_quantity <= 10">{{ book.stock_quantity }}</span>
+          </td>
+          <td>{{ book.selling_price_local ? book.selling_price_local + ' ' + actualCurrency : 'N/A' }}</td>
+          <td>
+            <button class="btn btn-sm btn-success me-1" (click)="calculatePrice(book.id)" [disabled]="calculatingId === book.id || isFetching">
+              @if (calculatingId === book.id) {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+              }
+              {{ calculatingId === book.id ? 'Calculando...' : 'Calcular Precio' }}
+            </button>
+            <button class="btn btn-sm btn-secondary me-1" [routerLink]="['/books/edit', book.id]" [disabled]="isFetching">Editar</button>
+            <button class="btn btn-sm btn-danger" (click)="deleteBook(book.id)" [disabled]="isFetching">Eliminar</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5" class="text-center">No hay libros registrados en el inventario</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
