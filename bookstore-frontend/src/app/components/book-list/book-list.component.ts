@@ -13,9 +13,12 @@ export class BookListComponent implements OnInit {
   books: any[] = [];
   calcResult: any = null;
   selectedCurrency: string = 'EUR';
-  actualCurrency: string = 'USD';
   isFetching = false; 
   calculatingId: number | null = null; 
+
+  currentPage = 1;
+  hasNext = false;
+  hasPrev = false;
 
   constructor(
     private bookService: BookService,
@@ -26,22 +29,34 @@ export class BookListComponent implements OnInit {
     this.loadBooks(); 
   }
 
-  loadBooks(category?: string) {
-    this.isFetching = true;
-    this.bookService.getBooks(1, category).subscribe({
-      next: (res: any) => { 
-        this.books = res.results ? res.results : res; 
-        this.isFetching = false;
-        this.cdr.detectChanges(); 
-      },
-      error: (err) => { 
-        console.error(err);
-        alert('Error cargando el inventario'); 
-        this.isFetching = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
+loadBooks(category?: string, page: number = 1) {
+  this.isFetching = true;
+  this.bookService.getBooks(page, category).subscribe({
+    next: (res: any) => { 
+      const bookList = res.results ? res.results : res; 
+    
+      const savedCurrencies = JSON.parse(localStorage.getItem('book_currencies') || '{}');
+      
+      this.books = bookList.map((book: any) => ({
+        ...book,
+        calculated_currency: savedCurrencies[book.id] || null
+      }));
+
+      this.hasNext = res.next !== null;
+      this.hasPrev = res.previous !== null;
+      this.currentPage = page;
+      
+      this.isFetching = false;
+      this.cdr.detectChanges(); 
+    },
+    error: (err) => { 
+      console.error(err);
+      alert('Error cargando el inventario'); 
+      this.isFetching = false;
+      this.cdr.detectChanges();
+    }
+  });
+}
 
   loadLowStock() {
     this.isFetching = true;
@@ -62,14 +77,23 @@ export class BookListComponent implements OnInit {
 calculatePrice(id: number) {
   this.calculatingId = id;
   this.calcResult = null;
+  
   this.bookService.calculatePrice(id, this.selectedCurrency).subscribe({
     next: (res) => { 
       this.calcResult = res; 
       this.calculatingId = null;
-      this.actualCurrency = this.selectedCurrency;
-      this.loadBooks(); 
-      this.cdr.detectChanges();
-      
+
+      const bookIndex = this.books.findIndex(b => b.id === id);
+      if (bookIndex !== -1) {
+        this.books[bookIndex].selling_price_local = res.selling_price_local;
+        this.books[bookIndex].calculated_currency = res.currency;
+
+        const savedCurrencies = JSON.parse(localStorage.getItem('book_currencies') || '{}');
+        savedCurrencies[id] = res.currency;
+        localStorage.setItem('book_currencies', JSON.stringify(savedCurrencies));
+      }
+
+      this.cdr.detectChanges(); 
     },
     error: (err) => {
       alert(`Error en el cálculo: ${err.status}`);
@@ -91,5 +115,13 @@ calculatePrice(id: number) {
         }
       });
     }
+  }
+
+  nextPage() {
+    if (this.hasNext) this.loadBooks(undefined, this.currentPage + 1);
+  }
+
+  prevPage() {
+    if (this.hasPrev) this.loadBooks(undefined, this.currentPage - 1);
   }
 }

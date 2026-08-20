@@ -39,7 +39,11 @@
     <thead class="table-dark">
       <tr>
         <th>Título</th>
+        <th>Autor</th>
+        <th>Categoría</th>
+        <th>País</th>
         <th>ISBN</th>
+        <th>Costo Base</th>
         <th>Stock</th>
         <th>Precio Local</th>
         <th>Acciones</th>
@@ -49,11 +53,15 @@
       @for (book of books; track book.id) {
         <tr>
           <td>{{ book.title }}</td>
+          <td>{{ book.author }}</td>
+          <td><span class="badge bg-info text-dark">{{ book.category }}</span></td>
+          <td>{{ book.supplier_country }}</td>
           <td>{{ book.isbn }}</td>
+          <td>{{ book.cost_usd }} USD</td>
           <td>
             <span [class.text-danger]="book.stock_quantity <= 10">{{ book.stock_quantity }}</span>
           </td>
-          <td>{{ book.selling_price_local ? book.selling_price_local + ' ' + actualCurrency : 'N/A' }}</td>
+          <td>{{ book.selling_price_local ? book.selling_price_local + ' ' + (book.calculated_currency || 'USD') : 'N/A' }}</td>
           <td>
             <button class="btn btn-sm btn-success me-1" (click)="calculatePrice(book.id)" [disabled]="calculatingId === book.id || isFetching">
               @if (calculatingId === book.id) {
@@ -67,9 +75,19 @@
         </tr>
       } @empty {
         <tr>
-          <td colspan="5" class="text-center">No hay libros registrados en el inventario</td>
+          <td colspan="9" class="text-center">No hay libros registrados en el inventario.</td>
         </tr>
       }
     </tbody>
   </table>
+
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <button class="btn btn-outline-primary" (click)="prevPage()" [disabled]="!hasPrev || isFetching">
+      Anterior
+    </button>
+    <span>Página {{ currentPage }}</span>
+    <button class="btn btn-outline-primary" (click)="nextPage()" [disabled]="!hasNext || isFetching">
+      Siguiente
+    </button>
+  </div>
 </div>
