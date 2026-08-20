@@ -7,9 +7,8 @@ class Book(models.Model):
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
     
-    # Regla: isbn debe tener formato válido (10 o 13 dígitos) y no permitir duplicados
     isbn = models.CharField(
-        max_length=14, # Puede incluir guiones
+        max_length=17, 
         unique=True,
         validators=[
             RegexValidator(
@@ -19,7 +18,6 @@ class Book(models.Model):
         ]
     )
     
-    # Regla: cost_usd debe ser mayor a 0
     cost_usd = models.DecimalField(
         max_digits=10, 
         decimal_places=2,
@@ -33,13 +31,12 @@ class Book(models.Model):
         blank=True
     )
     
-    # Regla: stock_quantity no puede ser negativo
     stock_quantity = models.IntegerField(
         validators=[MinValueValidator(0)]
     )
     
     category = models.CharField(max_length=100)
-    supplier_country = models.CharField(max_length=2) # Ej: "ES"
+    supplier_country = models.CharField(max_length=2)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
