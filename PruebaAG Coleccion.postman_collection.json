@@ -136,16 +136,53 @@
     {
       "name": "Actualizar Libro",
       "request": {
-        "method": "GET",
-        "header": []
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"title\": \"El Quijote (Edición Especial)\",\r\n    \"author\": \"Miguel de Cervantes\",\r\n    \"isbn\": \"978-84-376-0494-7\",\r\n    \"cost_usd\": 18.50,\r\n    \"stock_quantity\": 30,\r\n    \"category\": \"Literatura Clásica\",\r\n    \"supplier_country\": \"ES\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/books/1/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "books",
+            "1",
+            ""
+          ]
+        }
       },
       "response": []
     },
     {
       "name": "Eliminar libro",
       "request": {
-        "method": "GET",
-        "header": []
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/books/1/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "books",
+            "1",
+            ""
+          ]
+        }
       },
       "response": []
     },
@@ -153,7 +190,27 @@
       "name": "Buscar categoria",
       "request": {
         "method": "GET",
-        "header": []
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/books/search/?category=Literatura",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "books",
+            "search",
+            ""
+          ],
+          "query": [
+            {
+              "key": "category",
+              "value": "Literatura"
+            }
+          ]
+        }
       },
       "response": []
     },
@@ -161,7 +218,27 @@
       "name": "Consultar Stock bajo",
       "request": {
         "method": "GET",
-        "header": []
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/books/low-stock/?threshold=30",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "books",
+            "low-stock",
+            ""
+          ],
+          "query": [
+            {
+              "key": "threshold",
+              "value": "30"
+            }
+          ]
+        }
       },
       "response": []
     }
